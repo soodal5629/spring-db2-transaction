@@ -70,6 +70,32 @@ public class BasicTxTest {
         TransactionStatus tx2 = txManager.getTransaction(new DefaultTransactionAttribute());
         log.info("트랜잭션2 롤백");
         txManager.rollback(tx2);
+    }
 
+    @Test
+    void inner_commit() {
+        log.info("외부 트랜잭션 시작");
+        TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("outer.isNewTransaction()={}", outer.isNewTransaction());
+
+        // 아래 코드가 inner() 메소드 호출한 것과 똑같음
+        log.info("내부 트랜잭션 시작");
+        // 외부 트랜잭션에 참여하게 됨
+        TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("inner.isNewTransaction()={}", inner.isNewTransaction());
+        log.info("내부 트랜잭션 커밋");
+        txManager.commit(inner); // 로그 보면 실제로는 커밋해도 물리 커넥션에 대해 아무 일도 안함
+
+        log.info("외부 트랜잭션 커밋");
+        txManager.commit(outer);
+
+    }
+
+    private void inner() {
+        log.info("내부 트랜잭션 시작");
+        TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("inner.isNewTransaction()={}", inner.isNewTransaction());
+        log.info("내부 트랜잭션 커밋");
+        txManager.commit(inner);
     }
 }
