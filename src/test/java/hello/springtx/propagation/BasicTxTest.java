@@ -91,6 +91,24 @@ public class BasicTxTest {
 
     }
 
+    @Test
+    void outer_rollback() {
+        log.info("외부 트랜잭션 시작");
+        TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+
+        log.info("내부 트랜잭션 시작");
+        // 외부 트랜잭션에 참여하게 됨
+        TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("inner.isNewTransaction()={}", inner.isNewTransaction());
+        log.info("내부 트랜잭션 커밋");
+        txManager.commit(inner); // 로그 보면 실제로는 커밋해도 물리 커넥션에 대해 아무 일도 안함
+
+        // 전체 다 롤백됨
+        log.info("외부 트랜잭션 롤백");
+        txManager.rollback(outer);
+
+    }
+
     private void inner() {
         log.info("내부 트랜잭션 시작");
         TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
