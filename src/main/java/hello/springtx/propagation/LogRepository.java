@@ -15,7 +15,7 @@ public class LogRepository {
     // 스프링이 알아서 엔티티 매니저 주입해줌
     private final EntityManager em;
 
-    //@Transactional
+    @Transactional
     public void save(Log logMessage) {
         log.info("log 저장");
         em.persist(logMessage);
